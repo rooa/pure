@@ -109,6 +109,9 @@ prompt_pure_string_length_to_var() {
 	# perform expansion on str and check length
 	length=$(( ${#${(S%%)str//(\%([KF1]|)\{*\}|\%[Bbkf])}} ))
 
+	if [[ $str == ' ' ]]; then
+		length=0
+	fi
 	# store string length in variable as specified by caller
 	typeset -g "${var}"="${length}"
 }
@@ -153,8 +156,32 @@ prompt_pure_preprompt_render() {
 
 	# Construct the new prompt with a clean preprompt.
 	local -ah ps1
+	# Join parts, space separated.
+	local left=${(j. .)preprompt_parts}
+
+	local right='%*'
+
+	local conda=''
+	local conda_length=0
+
+	if [[ ! -z $CONDA_PREFIX ]]; then
+		condaenv=$(basename $CONDA_PREFIX)
+		conda=("${condaenv}")
+		prompt_pure_string_length_to_var $conda conda_length
+	fi
+
+	prompt_pure_string_length_to_var $left left_length
+	prompt_pure_string_length_to_var $right right_length
+	# Using the 'r' parameter expansion flag, we create spaces a specified length
+	local middle=${(r:$((COLUMNS - left_length - right_length - conda_length - 2)):)}
 	ps1=(
-		${(j. .)preprompt_parts}  # Join parts, space separated.
+		# ${(j. .)preprompt_parts}  # Join parts, space separated.
+		$left
+		$middle                      # Spacing
+		"%F{red}"
+		$conda
+		"%f "
+		$right
 		$prompt_newline           # Separate preprompt and prompt.
 		$cleaned_ps1
 	)

@@ -1,9 +1,11 @@
-# Pure
+# Pure -- Forked.
 
 > Pretty, minimal and fast ZSH prompt
 
 <img src="screenshot.png" width="864">
 
+## Mods by rooa
+* Displays conda environment and time at the right prompt.
 
 ## Overview
 
